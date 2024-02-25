@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "near_world_spawn",
+  "version": "${version}",
+  "name": "Near World Spawn",
+  "description": "Customize the way your world spawn is set",
+  "authors": [
+    "Pardys"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/near_world_spawn",
+    "repo": "https://github.com/sf-inc/near_world_spawn"
+  },
+  "license": "MIT",
+  "icon": "assets/near_world_spawn/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "com.github.charlyb01.near_world_spawn.NearWorldSpawn"
+    ]
+  },
+  "mixins": [
+    "near_world_spawn.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": "${minecraft_version}"
+  }
+}
