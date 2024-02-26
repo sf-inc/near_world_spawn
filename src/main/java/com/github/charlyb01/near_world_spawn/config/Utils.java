@@ -10,17 +10,17 @@ public class Utils {
     }
 
     public static int setVanillaType(CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = "vanilla";
+        ModConfig.get().type = SpawnType.VANILLA;
         return printConfig(context);
     }
 
     public static int setBoxType(CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = "box";
+        ModConfig.get().type = SpawnType.BOX;
         return printConfig(context);
     }
 
     public static int setCircleType(CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = "circle";
+        ModConfig.get().type = SpawnType.CIRCLE;
         return printConfig(context);
     }
 
@@ -30,13 +30,13 @@ public class Utils {
     }
 
     public static int setOffsetBoxType(boolean offset, CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = "box";
+        ModConfig.get().type = SpawnType.BOX;
         ModConfig.get().offset = offset;
         return printConfig(context);
     }
 
     public static int setOffsetCircleType(boolean offset, CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = "circle";
+        ModConfig.get().type = SpawnType.CIRCLE;
         ModConfig.get().offset = offset;
         return printConfig(context);
     }
@@ -47,14 +47,14 @@ public class Utils {
     }
 
     public static int setExpandOffsetBoxType(boolean offset, int expand, CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = "box";
+        ModConfig.get().type = SpawnType.BOX;
         ModConfig.get().offset = offset;
         ModConfig.get().expand = expand;
         return printConfig(context);
     }
 
     public static int setExpandOffsetCircleType(boolean offset, int expand, CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = "circle";
+        ModConfig.get().type = SpawnType.CIRCLE;
         ModConfig.get().offset = offset;
         ModConfig.get().expand = expand;
         return printConfig(context);
@@ -72,13 +72,13 @@ public class Utils {
         context.getSource().sendFeedback(
                 () -> {
                     Text text;
-                    if (ModConfig.get().type.equals("vanilla")) {
+                    if (ModConfig.get().type.equals(SpawnType.VANILLA)) {
                         text = Text.literal("Worldspawn set to %s"
-                                .formatted(ModConfig.get().type));
+                                .formatted(ModConfig.get().type.name));
                     } else {
                         String weighted = ModConfig.get().offset ? "a weighted" : "an absolute";
                         text = Text.literal("Worldspawn set to %s widened by %s blocks with %s center"
-                                .formatted(ModConfig.get().type, ModConfig.get().expand, weighted));
+                                .formatted(ModConfig.get().type.name, ModConfig.get().expand, weighted));
                     }
                     return text;
                 },

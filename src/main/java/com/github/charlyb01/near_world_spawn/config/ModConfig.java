@@ -7,7 +7,8 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 
 @Config(name = "near_world_spawn")
 public class ModConfig implements ConfigData {
-    public String type = "box";
+    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+    public SpawnType type = SpawnType.BOX;
     public boolean offset = true;
     @ConfigEntry.BoundedDiscrete(min = 0, max = 10000)
     public int expand = 250;
