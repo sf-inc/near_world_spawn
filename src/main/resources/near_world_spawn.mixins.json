@@ -4,6 +4,7 @@
   "package": "com.github.charlyb01.near_world_spawn.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "ServerPlayerEntityMixin"
   ],
   "client": [
   ],

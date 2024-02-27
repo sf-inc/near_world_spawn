@@ -26,6 +26,7 @@
   "mixins": [
     "near_world_spawn.mixins.json"
   ],
+  "accessWidener" : "near_world_spawn.accesswidener",
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
