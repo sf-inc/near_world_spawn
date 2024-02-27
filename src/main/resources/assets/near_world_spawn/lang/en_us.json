@@ -3,5 +3,6 @@
 
   "text.autoconfig.near_world_spawn.option.type": "World Spawn Type",
   "text.autoconfig.near_world_spawn.option.offset": "Offset area based on players distribution",
-  "text.autoconfig.near_world_spawn.option.expand": "Expand area of X blocks"
+  "text.autoconfig.near_world_spawn.option.expand": "Expand area of X blocks",
+  "text.autoconfig.near_world_spawn.option.fixedLoadedChunks": "Loaded spawn chunks are fixed around (0,0,0)"
 }

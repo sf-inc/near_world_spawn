@@ -12,6 +12,7 @@ public class ModConfig implements ConfigData {
     public boolean offset = true;
     @ConfigEntry.BoundedDiscrete(min = 0, max = 10000)
     public int expand = 250;
+    public boolean fixedLoadedChunks = true;
 
     public static ModConfig get() {
         return AutoConfig.getConfigHolder(ModConfig.class).getConfig();
