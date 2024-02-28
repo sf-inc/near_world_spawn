@@ -81,9 +81,24 @@ public abstract class ServerPlayerEntityMixin {
             maxZ += ModConfig.get().expand;
         }
 
-        int count = Math.min((maxX - minX) * (maxZ - minZ), 1000);
-        int radius = Math.max(maxX - minX, maxZ - minZ) / 2;
+        int lengthX = maxX - minX;
+        int lengthZ = maxZ - minZ;
         boolean isCircle = ModConfig.get().spawnType.equals(SpawnType.CIRCLE);
+
+        if (isCircle) {
+            if (lengthX > lengthZ) {
+                lengthZ = lengthX;
+                minZ = center.getZ() - lengthX / 2;
+                maxZ = center.getZ() + lengthX / 2;
+            } else {
+                lengthX = lengthZ;
+                minX = center.getX() - lengthZ / 2;
+                maxX = center.getX() + lengthZ / 2;
+            }
+        }
+
+        int radius = lengthX / 2;
+        int count = Math.min(lengthX * lengthZ, 1000);
 
         for (BlockPos blockPos : BlockPos.iterateRandomly(this.getServerWorld().getRandom(), count,
                 minX, 0, minZ, maxX, 0, maxZ)) {
