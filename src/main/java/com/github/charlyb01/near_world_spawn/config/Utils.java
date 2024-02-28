@@ -35,6 +35,12 @@ public class Utils {
         return printTypeInfluenceAndExpand(context) + 1;
     }
 
+    public static int setFixedLoadedChunks(boolean fixed, CommandContext<ServerCommandSource> context) {
+        ModConfig.get().fixedLoadedChunks = fixed;
+        ModConfig.save();
+        return printFixedLoadedChunks(context) + 1;
+    }
+
     public static int printSpawnType(CommandContext<ServerCommandSource> context) {
         context.getSource().sendFeedback(
                 () -> Text.literal("Worldspawn type set to %s"
@@ -75,6 +81,16 @@ public class Utils {
                     }
                     return text;
                 },
+                true);
+
+        return 0;
+    }
+
+    public static int printFixedLoadedChunks(CommandContext<ServerCommandSource> context) {
+        String fixed = ModConfig.get().fixedLoadedChunks ? "fixed (0,0,0)" : "world spawn";
+        context.getSource().sendFeedback(
+                () -> Text.literal("Spawn chunks set to %s"
+                        .formatted(fixed)),
                 true);
 
         return 0;

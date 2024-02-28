@@ -69,6 +69,14 @@ public class NearWorldSpawn implements ModInitializer {
                     .then(CommandManager.argument("expand", IntegerArgumentType.integer(0))
                             .executes(context -> Utils.setExpand(IntegerArgumentType.getInteger(context, "expand"), context)))
             );
+            dispatcher.register(CommandManager.literal("spawnchunks")
+                    .requires(source -> source.hasPermissionLevel(2))
+                    .executes(Utils::printFixedLoadedChunks)
+                    .then(CommandManager.literal("fixed")
+                            .executes(context -> Utils.setFixedLoadedChunks(true, context)))
+                    .then(CommandManager.literal("worldspawn")
+                            .executes(context -> Utils.setFixedLoadedChunks(false, context)))
+            );
         });
     }
 }
