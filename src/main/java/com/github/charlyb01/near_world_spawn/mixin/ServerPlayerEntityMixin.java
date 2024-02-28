@@ -2,7 +2,7 @@ package com.github.charlyb01.near_world_spawn.mixin;
 
 import com.github.charlyb01.near_world_spawn.config.ModConfig;
 import com.github.charlyb01.near_world_spawn.config.PlayerInfluence;
-import com.github.charlyb01.near_world_spawn.config.SpawnType;
+import com.github.charlyb01.near_world_spawn.config.AreaShape;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.SpawnLocating;
@@ -24,7 +24,7 @@ public abstract class ServerPlayerEntityMixin {
     @Inject(method = "moveToSpawn", at = @At("HEAD"))
     private void updateWorldSpawn(ServerWorld world, CallbackInfo ci) {
         if (this.getSpawnPointPosition() != null) return;
-        if (ModConfig.get().spawnType.equals(SpawnType.VANILLA)) return;
+        if (!ModConfig.get().changingArea) return;
 
         ServerPlayerEntity thisPlayer = (ServerPlayerEntity)(Object) this;
         ServerWorld serverWorld = this.getServerWorld().getServer().getOverworld();
@@ -83,10 +83,10 @@ public abstract class ServerPlayerEntityMixin {
 
         int lengthX = maxX - minX;
         int lengthZ = maxZ - minZ;
-        boolean isCircleType = ModConfig.get().spawnType.isCircle();
+        boolean isCircleType = ModConfig.get().areaShape.isCircle();
 
         if (isCircleType) {
-            int preferredLength = ModConfig.get().spawnType.equals(SpawnType.INNER_CIRCLE)
+            int preferredLength = ModConfig.get().areaShape.equals(AreaShape.INNER_CIRCLE)
                     ? Math.min(lengthX, lengthZ)
                     : Math.max(lengthX, lengthZ);
             if (lengthX == preferredLength) {

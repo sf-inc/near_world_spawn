@@ -1,7 +1,8 @@
 {
   "text.autoconfig.near_world_spawn.title": "Near World Spawn - Configuration",
 
-  "text.autoconfig.near_world_spawn.option.spawnType": "World spawn type",
+  "text.autoconfig.near_world_spawn.option.changingArea": "World spawn changing area",
+  "text.autoconfig.near_world_spawn.option.areaShape": "World spawn area shape",
   "text.autoconfig.near_world_spawn.option.playerInfluence": "Player influence on spawn area",
   "text.autoconfig.near_world_spawn.option.expand": "Expand area of X blocks",
   "text.autoconfig.near_world_spawn.option.fixedLoadedChunks": "Loaded spawn chunks are fixed around (0,0,0)"

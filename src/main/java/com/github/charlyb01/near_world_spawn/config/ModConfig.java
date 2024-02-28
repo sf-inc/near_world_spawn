@@ -7,8 +7,9 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 
 @Config(name = "near_world_spawn")
 public class ModConfig implements ConfigData {
+    public boolean changingArea = true;
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-    public SpawnType spawnType = SpawnType.BOX;
+    public AreaShape areaShape = AreaShape.BOX;
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
     public PlayerInfluence playerInfluence = PlayerInfluence.AREA_OFFSET;
     @ConfigEntry.BoundedDiscrete(min = 0, max = 10000)

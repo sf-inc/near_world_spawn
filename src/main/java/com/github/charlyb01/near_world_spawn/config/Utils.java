@@ -9,10 +9,16 @@ public class Utils {
 
     }
 
-    public static int setSpawnType(SpawnType type, CommandContext<ServerCommandSource> context) {
-        ModConfig.get().spawnType = type;
+    public static int setChangingArea(boolean changing, CommandContext<ServerCommandSource> context) {
+        ModConfig.get().changingArea = changing;
         ModConfig.save();
-        return printSpawnType(context) + 1;
+        return printChangingArea(context) + 1;
+    }
+
+    public static int setAreaShape(AreaShape shape, CommandContext<ServerCommandSource> context) {
+        ModConfig.get().areaShape = shape;
+        ModConfig.save();
+        return printAreaShape(context) + 1;
     }
 
     public static int setPlayerInfluence(PlayerInfluence influence, CommandContext<ServerCommandSource> context) {
@@ -27,12 +33,12 @@ public class Utils {
         return printExpand(context) + 1;
     }
 
-    public static int setTypeInfluenceAndExpand(SpawnType type, PlayerInfluence influence, int expand, CommandContext<ServerCommandSource> context) {
-        ModConfig.get().spawnType = type;
+    public static int setShapeInfluenceAndExpand(AreaShape shape, PlayerInfluence influence, int expand, CommandContext<ServerCommandSource> context) {
+        ModConfig.get().areaShape = shape;
         ModConfig.get().playerInfluence = influence;
         ModConfig.get().expand = expand;
         ModConfig.save();
-        return printTypeInfluenceAndExpand(context) + 1;
+        return printShapeInfluenceAndExpand(context) + 1;
     }
 
     public static int setFixedLoadedChunks(boolean fixed, CommandContext<ServerCommandSource> context) {
@@ -41,16 +47,36 @@ public class Utils {
         return printFixedLoadedChunks(context) + 1;
     }
 
-    public static int printSpawnType(CommandContext<ServerCommandSource> context) {
+    public static int printChangingArea(CommandContext<ServerCommandSource> context) {
+        String changing = ModConfig.get().changingArea
+                ? "changing area around players"
+                : "not changing (vanilla)";
         context.getSource().sendFeedback(
-                () -> Text.literal("Worldspawn type set to %s"
-                        .formatted(ModConfig.get().spawnType.name)),
+                () -> Text.literal("World spawn is %s"
+                        .formatted(changing)),
+                true);
+
+        return 0;
+    }
+
+    public static int printAreaShape(CommandContext<ServerCommandSource> context) {
+        if (!ModConfig.get().changingArea) {
+            return printChangingArea(context);
+        }
+
+        context.getSource().sendFeedback(
+                () -> Text.literal("Worldspawn area shape set to %s"
+                        .formatted(ModConfig.get().areaShape.name)),
                 true);
 
         return 0;
     }
 
     public static int printPlayerInfluence(CommandContext<ServerCommandSource> context) {
+        if (!ModConfig.get().changingArea) {
+            return printChangingArea(context);
+        }
+
         context.getSource().sendFeedback(
                 () -> Text.literal("Worldspawn player influence set to %s"
                         .formatted(ModConfig.get().playerInfluence.name)),
@@ -60,6 +86,10 @@ public class Utils {
     }
 
     public static int printExpand(CommandContext<ServerCommandSource> context) {
+        if (!ModConfig.get().changingArea) {
+            return printChangingArea(context);
+        }
+
         context.getSource().sendFeedback(
                 () -> Text.literal("Worldspawn expand set to %s"
                         .formatted(ModConfig.get().expand)),
@@ -68,19 +98,14 @@ public class Utils {
         return 0;
     }
 
-    public static int printTypeInfluenceAndExpand(CommandContext<ServerCommandSource> context) {
+    public static int printShapeInfluenceAndExpand(CommandContext<ServerCommandSource> context) {
+        if (!ModConfig.get().changingArea) {
+            return printChangingArea(context);
+        }
+
         context.getSource().sendFeedback(
-                () -> {
-                    Text text;
-                    if (ModConfig.get().spawnType.equals(SpawnType.VANILLA)) {
-                        text = Text.literal("Worldspawn type set to %s"
-                                .formatted(ModConfig.get().spawnType.name));
-                    } else {
-                        text = Text.literal("Worldspawn type set to %s widened by %s blocks with a player influence set to %s"
-                                .formatted(ModConfig.get().spawnType.name, ModConfig.get().expand, ModConfig.get().playerInfluence.name));
-                    }
-                    return text;
-                },
+                () -> Text.literal("Worldspawn area shape set to %s widened by %s blocks with a player influence set to %s"
+                        .formatted(ModConfig.get().areaShape.name, ModConfig.get().expand, ModConfig.get().playerInfluence.name)),
                 true);
 
         return 0;
