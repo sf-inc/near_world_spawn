@@ -83,17 +83,20 @@ public abstract class ServerPlayerEntityMixin {
 
         int lengthX = maxX - minX;
         int lengthZ = maxZ - minZ;
-        boolean isCircle = ModConfig.get().spawnType.equals(SpawnType.CIRCLE);
+        boolean isCircleType = ModConfig.get().spawnType.isCircle();
 
-        if (isCircle) {
-            if (lengthX > lengthZ) {
-                lengthZ = lengthX;
-                minZ = center.getZ() - lengthX / 2;
-                maxZ = center.getZ() + lengthX / 2;
+        if (isCircleType) {
+            int preferredLength = ModConfig.get().spawnType.equals(SpawnType.INNER_CIRCLE)
+                    ? Math.min(lengthX, lengthZ)
+                    : Math.max(lengthX, lengthZ);
+            if (lengthX == preferredLength) {
+                lengthZ = preferredLength;
+                minZ = center.getZ() - preferredLength / 2;
+                maxZ = center.getZ() + preferredLength / 2;
             } else {
-                lengthX = lengthZ;
-                minX = center.getX() - lengthZ / 2;
-                maxX = center.getX() + lengthZ / 2;
+                lengthX = preferredLength;
+                minX = center.getX() - preferredLength / 2;
+                maxX = center.getX() + preferredLength / 2;
             }
         }
 
@@ -102,7 +105,7 @@ public abstract class ServerPlayerEntityMixin {
 
         for (BlockPos blockPos : BlockPos.iterateRandomly(this.getServerWorld().getRandom(), count,
                 minX, 0, minZ, maxX, 0, maxZ)) {
-            if (isCircle && !blockPos.isWithinDistance(center, radius)) continue;
+            if (isCircleType && !blockPos.isWithinDistance(center, radius)) continue;
 
             BlockPos blockPos2 = SpawnLocating.findOverworldSpawn(world, blockPos.getX(), blockPos.getZ());
             if (blockPos2 == null) continue;
