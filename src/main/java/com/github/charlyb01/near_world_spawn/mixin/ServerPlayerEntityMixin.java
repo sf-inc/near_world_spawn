@@ -1,6 +1,7 @@
 package com.github.charlyb01.near_world_spawn.mixin;
 
 import com.github.charlyb01.near_world_spawn.config.ModConfig;
+import com.github.charlyb01.near_world_spawn.config.PlayerInfluence;
 import com.github.charlyb01.near_world_spawn.config.SpawnType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -23,7 +24,7 @@ public abstract class ServerPlayerEntityMixin {
     @Inject(method = "moveToSpawn", at = @At("HEAD"))
     private void updateWorldSpawn(ServerWorld world, CallbackInfo ci) {
         if (this.getSpawnPointPosition() != null) return;
-        if (ModConfig.get().type.equals(SpawnType.VANILLA)) return;
+        if (ModConfig.get().spawnType.equals(SpawnType.VANILLA)) return;
 
         ServerPlayerEntity thisPlayer = (ServerPlayerEntity)(Object) this;
         ServerWorld serverWorld = this.getServerWorld().getServer().getOverworld();
@@ -57,7 +58,7 @@ public abstract class ServerPlayerEntityMixin {
         weightedCenterZ /= nbPlayers;
         BlockPos center = new BlockPos((minX + maxX) / 2, 0, (minZ + maxZ) / 2);
 
-        if (ModConfig.get().offset) {
+        if (ModConfig.get().playerInfluence.equals(PlayerInfluence.AREA_OFFSET)) {
             int offsetX = weightedCenterX - center.getX();
             int offsetZ = weightedCenterZ - center.getZ();
             minX += offsetX;
@@ -76,7 +77,7 @@ public abstract class ServerPlayerEntityMixin {
 
         int count = Math.min((maxX - minX) * (maxZ - minZ), 1000);
         int radius = Math.max(maxX - minX, maxZ - minZ) / 2;
-        boolean isCircle = ModConfig.get().type.equals(SpawnType.CIRCLE);
+        boolean isCircle = ModConfig.get().spawnType.equals(SpawnType.CIRCLE);
 
         for (BlockPos blockPos : BlockPos.iterateRandomly(this.getServerWorld().getRandom(), count,
                 minX, 0, minZ, maxX, 0, maxZ)) {

@@ -9,35 +9,19 @@ public class Utils {
 
     }
 
-    public static int setVanillaType(CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = SpawnType.VANILLA;
+    public static int setSpawnType(SpawnType type, CommandContext<ServerCommandSource> context) {
+        ModConfig.get().spawnType = type;
         return printConfig(context);
     }
 
-    public static int setBoxType(CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = SpawnType.BOX;
+    public static int setPlayerInfluence(PlayerInfluence influence, CommandContext<ServerCommandSource> context) {
+        ModConfig.get().playerInfluence = influence;
         return printConfig(context);
     }
 
-    public static int setCircleType(CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = SpawnType.CIRCLE;
-        return printConfig(context);
-    }
-
-    public static int setOffset(boolean offset, CommandContext<ServerCommandSource> context) {
-        ModConfig.get().offset = offset;
-        return printConfig(context);
-    }
-
-    public static int setOffsetBoxType(boolean offset, CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = SpawnType.BOX;
-        ModConfig.get().offset = offset;
-        return printConfig(context);
-    }
-
-    public static int setOffsetCircleType(boolean offset, CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = SpawnType.CIRCLE;
-        ModConfig.get().offset = offset;
+    public static int setTypeAndInfluence(SpawnType type, PlayerInfluence influence, CommandContext<ServerCommandSource> context) {
+        ModConfig.get().spawnType = type;
+        ModConfig.get().playerInfluence = influence;
         return printConfig(context);
     }
 
@@ -46,16 +30,9 @@ public class Utils {
         return printConfig(context);
     }
 
-    public static int setExpandOffsetBoxType(boolean offset, int expand, CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = SpawnType.BOX;
-        ModConfig.get().offset = offset;
-        ModConfig.get().expand = expand;
-        return printConfig(context);
-    }
-
-    public static int setExpandOffsetCircleType(boolean offset, int expand, CommandContext<ServerCommandSource> context) {
-        ModConfig.get().type = SpawnType.CIRCLE;
-        ModConfig.get().offset = offset;
+    public static int setTypeInfluenceAndExpand(SpawnType type, PlayerInfluence influence, int expand, CommandContext<ServerCommandSource> context) {
+        ModConfig.get().spawnType = type;
+        ModConfig.get().playerInfluence = influence;
         ModConfig.get().expand = expand;
         return printConfig(context);
     }
@@ -72,13 +49,12 @@ public class Utils {
         context.getSource().sendFeedback(
                 () -> {
                     Text text;
-                    if (ModConfig.get().type.equals(SpawnType.VANILLA)) {
+                    if (ModConfig.get().spawnType.equals(SpawnType.VANILLA)) {
                         text = Text.literal("Worldspawn set to %s"
-                                .formatted(ModConfig.get().type.name));
+                                .formatted(ModConfig.get().spawnType.name));
                     } else {
-                        String weighted = ModConfig.get().offset ? "a weighted" : "an absolute";
-                        text = Text.literal("Worldspawn set to %s widened by %s blocks with %s center"
-                                .formatted(ModConfig.get().type.name, ModConfig.get().expand, weighted));
+                        text = Text.literal("Worldspawn set to %s widened by %s blocks with a player influence set to %s"
+                                .formatted(ModConfig.get().spawnType.name, ModConfig.get().expand, ModConfig.get().playerInfluence));
                     }
                     return text;
                 },

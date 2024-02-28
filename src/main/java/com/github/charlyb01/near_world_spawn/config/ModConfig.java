@@ -8,8 +8,9 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 @Config(name = "near_world_spawn")
 public class ModConfig implements ConfigData {
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-    public SpawnType type = SpawnType.BOX;
-    public boolean offset = true;
+    public SpawnType spawnType = SpawnType.BOX;
+    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+    public PlayerInfluence playerInfluence = PlayerInfluence.AREA_OFFSET;
     @ConfigEntry.BoundedDiscrete(min = 0, max = 10000)
     public int expand = 250;
     public boolean fixedLoadedChunks = true;
