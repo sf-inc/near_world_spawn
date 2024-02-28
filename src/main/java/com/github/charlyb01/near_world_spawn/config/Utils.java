@@ -11,55 +11,72 @@ public class Utils {
 
     public static int setSpawnType(SpawnType type, CommandContext<ServerCommandSource> context) {
         ModConfig.get().spawnType = type;
-        return printConfig(context);
+        ModConfig.save();
+        return printSpawnType(context) + 1;
     }
 
     public static int setPlayerInfluence(PlayerInfluence influence, CommandContext<ServerCommandSource> context) {
         ModConfig.get().playerInfluence = influence;
-        return printConfig(context);
-    }
-
-    public static int setTypeAndInfluence(SpawnType type, PlayerInfluence influence, CommandContext<ServerCommandSource> context) {
-        ModConfig.get().spawnType = type;
-        ModConfig.get().playerInfluence = influence;
-        return printConfig(context);
+        ModConfig.save();
+        return printPlayerInfluence(context) + 1;
     }
 
     public static int setExpand(int expand, CommandContext<ServerCommandSource> context) {
         ModConfig.get().expand = expand;
-        return printConfig(context);
+        ModConfig.save();
+        return printExpand(context) + 1;
     }
 
     public static int setTypeInfluenceAndExpand(SpawnType type, PlayerInfluence influence, int expand, CommandContext<ServerCommandSource> context) {
         ModConfig.get().spawnType = type;
         ModConfig.get().playerInfluence = influence;
         ModConfig.get().expand = expand;
-        return printConfig(context);
+        ModConfig.save();
+        return printTypeInfluenceAndExpand(context) + 1;
     }
 
-    public static int printConfig(CommandContext<ServerCommandSource> context) {
-        return printConfig(context, true);
+    public static int printSpawnType(CommandContext<ServerCommandSource> context) {
+        context.getSource().sendFeedback(
+                () -> Text.literal("Worldspawn type set to %s"
+                        .formatted(ModConfig.get().spawnType.name)),
+                true);
+
+        return 0;
     }
 
-    public static int printConfig(CommandContext<ServerCommandSource> context, boolean save) {
-        if (save) {
-            ModConfig.save();
-        }
+    public static int printPlayerInfluence(CommandContext<ServerCommandSource> context) {
+        context.getSource().sendFeedback(
+                () -> Text.literal("Worldspawn player influence set to %s"
+                        .formatted(ModConfig.get().playerInfluence.name)),
+                true);
 
+        return 0;
+    }
+
+    public static int printExpand(CommandContext<ServerCommandSource> context) {
+        context.getSource().sendFeedback(
+                () -> Text.literal("Worldspawn expand set to %s"
+                        .formatted(ModConfig.get().expand)),
+                true);
+
+        return 0;
+    }
+
+    public static int printTypeInfluenceAndExpand(CommandContext<ServerCommandSource> context) {
         context.getSource().sendFeedback(
                 () -> {
                     Text text;
                     if (ModConfig.get().spawnType.equals(SpawnType.VANILLA)) {
-                        text = Text.literal("Worldspawn set to %s"
+                        text = Text.literal("Worldspawn type set to %s"
                                 .formatted(ModConfig.get().spawnType.name));
                     } else {
-                        text = Text.literal("Worldspawn set to %s widened by %s blocks with a player influence set to %s"
-                                .formatted(ModConfig.get().spawnType.name, ModConfig.get().expand, ModConfig.get().playerInfluence));
+                        text = Text.literal("Worldspawn type set to %s widened by %s blocks with a player influence set to %s"
+                                .formatted(ModConfig.get().spawnType.name, ModConfig.get().expand, ModConfig.get().playerInfluence.name));
                     }
                     return text;
                 },
                 true);
 
-        return save ? 1 : 0;
+        return 0;
     }
 }
