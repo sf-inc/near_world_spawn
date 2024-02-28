@@ -58,13 +58,19 @@ public abstract class ServerPlayerEntityMixin {
         weightedCenterZ /= nbPlayers;
         BlockPos center = new BlockPos((minX + maxX) / 2, 0, (minZ + maxZ) / 2);
 
+        int offsetX = weightedCenterX - center.getX();
+        int offsetZ = weightedCenterZ - center.getZ();
         if (ModConfig.get().playerInfluence.equals(PlayerInfluence.AREA_OFFSET)) {
-            int offsetX = weightedCenterX - center.getX();
-            int offsetZ = weightedCenterZ - center.getZ();
             minX += offsetX;
             maxX += offsetX;
             minZ += offsetZ;
             maxZ += offsetZ;
+            center = new BlockPos(weightedCenterX, 0, weightedCenterZ);
+        } else if (ModConfig.get().playerInfluence.equals(PlayerInfluence.AREA_SHRINK)) {
+            if (offsetX > 0) minX += 2 * offsetX;
+            else maxX += 2 * offsetX;
+            if (offsetZ > 0) minZ += 2 * offsetZ;
+            else maxZ += 2 * offsetZ;
             center = new BlockPos(weightedCenterX, 0, weightedCenterZ);
         }
 
