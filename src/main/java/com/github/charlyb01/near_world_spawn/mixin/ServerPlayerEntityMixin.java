@@ -83,20 +83,17 @@ public abstract class ServerPlayerEntityMixin {
 
         int lengthX = maxX - minX;
         int lengthZ = maxZ - minZ;
-        boolean isCircleType = ModConfig.get().areaShape.isCircle();
+        boolean isCircleType = ModConfig.get().areaShape.equals(AreaShape.CIRCLE);
 
         if (isCircleType) {
-            int preferredLength = ModConfig.get().areaShape.equals(AreaShape.INNER_CIRCLE)
-                    ? Math.min(lengthX, lengthZ)
-                    : Math.max(lengthX, lengthZ);
-            if (lengthX == preferredLength) {
-                lengthZ = preferredLength;
-                minZ = center.getZ() - preferredLength / 2;
-                maxZ = center.getZ() + preferredLength / 2;
+            if (lengthX > lengthZ) {
+                lengthZ = lengthX;
+                minZ = center.getZ() - lengthX / 2;
+                maxZ = center.getZ() + lengthX / 2;
             } else {
-                lengthX = preferredLength;
-                minX = center.getX() - preferredLength / 2;
-                maxX = center.getX() + preferredLength / 2;
+                lengthX = lengthZ;
+                minX = center.getX() - lengthZ / 2;
+                maxX = center.getX() + lengthZ / 2;
             }
         }
 
