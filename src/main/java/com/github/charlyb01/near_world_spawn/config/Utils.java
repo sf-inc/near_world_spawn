@@ -1,5 +1,6 @@
 package com.github.charlyb01.near_world_spawn.config;
 
+import com.github.charlyb01.near_world_spawn.NearWorldSpawn;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -42,8 +43,11 @@ public class Utils {
     }
 
     public static int setFixedLoadedChunks(boolean fixed, CommandContext<ServerCommandSource> context) {
-        ModConfig.get().fixedLoadedChunks = fixed;
-        ModConfig.save();
+        if (ModConfig.get().fixedLoadedChunks != fixed) {
+            ModConfig.get().fixedLoadedChunks = fixed;
+            ModConfig.save();
+            NearWorldSpawn.needChunkUpdate = !NearWorldSpawn.needChunkUpdate;
+        }
         return printFixedLoadedChunks(context) + 1;
     }
 
