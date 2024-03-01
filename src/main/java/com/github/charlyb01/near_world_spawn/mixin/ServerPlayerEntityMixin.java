@@ -1,8 +1,8 @@
 package com.github.charlyb01.near_world_spawn.mixin;
 
+import com.github.charlyb01.near_world_spawn.config.AreaShape;
 import com.github.charlyb01.near_world_spawn.config.ModConfig;
 import com.github.charlyb01.near_world_spawn.config.PlayerInfluence;
-import com.github.charlyb01.near_world_spawn.config.AreaShape;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.SpawnLocating;
@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -19,7 +20,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ServerPlayerEntityMixin {
     @Shadow public abstract @Nullable BlockPos getSpawnPointPosition();
 
-    @Shadow public abstract ServerWorld getServerWorld();
+    @Unique
+    private static final int MAX_ITERATION = 1000;
 
     @Inject(method = "moveToSpawn", at = @At("HEAD"))
     private void updateWorldSpawn(ServerWorld world, CallbackInfo ci) {
@@ -27,7 +29,7 @@ public abstract class ServerPlayerEntityMixin {
         if (!ModConfig.get().changingArea) return;
 
         ServerPlayerEntity thisPlayer = (ServerPlayerEntity)(Object) this;
-        ServerWorld serverWorld = this.getServerWorld().getServer().getOverworld();
+        ServerWorld serverWorld = world.getServer().getOverworld();
 
         Integer minX = null, minZ = null;
         Integer maxX = null, maxZ = null;
@@ -56,22 +58,28 @@ public abstract class ServerPlayerEntityMixin {
 
         weightedCenterX /= nbPlayers;
         weightedCenterZ /= nbPlayers;
-        BlockPos center = new BlockPos((minX + maxX) / 2, 0, (minZ + maxZ) / 2);
 
-        int offsetX = weightedCenterX - center.getX();
-        int offsetZ = weightedCenterZ - center.getZ();
+        int centerX = (minX + maxX) / 2;
+        int centerZ = (minZ + maxZ) / 2;
+        int offsetX = weightedCenterX - centerX;
+        int offsetZ = weightedCenterZ - centerZ;
+
         if (ModConfig.get().playerInfluence.equals(PlayerInfluence.AREA_OFFSET)) {
             minX += offsetX;
             maxX += offsetX;
             minZ += offsetZ;
             maxZ += offsetZ;
-            center = new BlockPos(weightedCenterX, 0, weightedCenterZ);
+
+            centerX = weightedCenterX;
+            centerZ = weightedCenterZ;
         } else if (ModConfig.get().playerInfluence.equals(PlayerInfluence.AREA_SHRINK)) {
             if (offsetX > 0) minX += 2 * offsetX;
             else maxX += 2 * offsetX;
             if (offsetZ > 0) minZ += 2 * offsetZ;
             else maxZ += 2 * offsetZ;
-            center = new BlockPos(weightedCenterX, 0, weightedCenterZ);
+
+            centerX = weightedCenterX;
+            centerZ = weightedCenterZ;
         }
 
         if (ModConfig.get().expand > 0) {
@@ -81,33 +89,40 @@ public abstract class ServerPlayerEntityMixin {
             maxZ += ModConfig.get().expand;
         }
 
-        int lengthX = maxX - minX;
-        int lengthZ = maxZ - minZ;
-        boolean isCircleType = ModConfig.get().areaShape.equals(AreaShape.CIRCLE);
-
-        if (isCircleType) {
-            if (lengthX > lengthZ) {
-                lengthZ = lengthX;
-                minZ = center.getZ() - lengthX / 2;
-                maxZ = center.getZ() + lengthX / 2;
-            } else {
-                lengthX = lengthZ;
-                minX = center.getX() - lengthZ / 2;
-                maxX = center.getX() + lengthZ / 2;
-            }
+        if (ModConfig.get().areaShape.equals(AreaShape.BOX)) {
+            this.setSpawnPosBox(minX, minZ, maxX, maxZ, serverWorld);
+        } else {
+            this.setSpawnPosCircle(minX, minZ, maxX, maxZ, centerX, centerZ, serverWorld);
         }
+    }
 
-        int radius = lengthX / 2;
-        int count = Math.min(lengthX * lengthZ, 1000);
-
-        for (BlockPos blockPos : BlockPos.iterateRandomly(this.getServerWorld().getRandom(), count,
+    @Unique
+    private void setSpawnPosBox(int minX, int minZ, int maxX, int maxZ, ServerWorld serverWorld) {
+        for (BlockPos blockPos : BlockPos.iterateRandomly(serverWorld.getRandom(), MAX_ITERATION,
                 minX, 0, minZ, maxX, 0, maxZ)) {
-            if (isCircleType && !blockPos.isWithinDistance(center, radius)) continue;
+            BlockPos spawnPos = SpawnLocating.findOverworldSpawn(serverWorld, blockPos.getX(), blockPos.getZ());
+            if (spawnPos == null) continue;
 
-            BlockPos blockPos2 = SpawnLocating.findOverworldSpawn(world, blockPos.getX(), blockPos.getZ());
-            if (blockPos2 == null) continue;
+            serverWorld.setSpawnPos(spawnPos, 0.f);
+            break;
+        }
+    }
 
-            serverWorld.setSpawnPos(blockPos2, 0.f);
+    @Unique
+    private void setSpawnPosCircle(int minX, int minZ, int maxX, int maxZ, int centerX, int centerZ,
+                                   ServerWorld serverWorld) {
+        double radius = Math.max(maxX - minX, maxZ - minZ) / 2.0;
+
+        for (int i = 0; i < MAX_ITERATION; ++i) {
+            double r = radius * Math.sqrt(serverWorld.getRandom().nextDouble());
+            double theta = 2.0 * Math.PI * serverWorld.getRandom().nextDouble();
+            int x = (int) (r * Math.cos(theta));
+            int z = (int) (r * Math.sin(theta));
+
+            BlockPos spawnPos = SpawnLocating.findOverworldSpawn(serverWorld, centerX + x, centerZ + z);
+            if (spawnPos == null) continue;
+
+            serverWorld.setSpawnPos(spawnPos, 0.f);
             break;
         }
     }
