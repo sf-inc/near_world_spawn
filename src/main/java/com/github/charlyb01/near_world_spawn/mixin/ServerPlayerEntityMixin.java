@@ -8,28 +8,31 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.SpawnLocating;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.TeleportTarget;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin {
     @Shadow public abstract @Nullable BlockPos getSpawnPointPosition();
+    @Shadow public abstract ServerWorld getServerWorld();
 
     @Unique
     private static final int MAX_ITERATION = 1000;
 
-    @Inject(method = "moveToSpawn", at = @At("HEAD"))
-    private void updateWorldSpawn(ServerWorld world, CallbackInfo ci) {
+    @Inject(method = "getRespawnTarget", at = @At("HEAD"))
+    private void updateWorldSpawn(boolean alive, TeleportTarget.PostDimensionTransition postDimensionTransition,
+                                  CallbackInfoReturnable<TeleportTarget> cir) {
         if (this.getSpawnPointPosition() != null) return;
         if (!ModConfig.get().changingArea) return;
 
         ServerPlayerEntity thisPlayer = (ServerPlayerEntity)(Object) this;
-        ServerWorld serverWorld = world.getServer().getOverworld();
+        ServerWorld serverWorld = this.getServerWorld().getServer().getOverworld();
 
         Integer minX = null, minZ = null;
         Integer maxX = null, maxZ = null;

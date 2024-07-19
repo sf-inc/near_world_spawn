@@ -2,7 +2,8 @@ package com.github.charlyb01.near_world_spawn.mixin;
 
 import com.github.charlyb01.near_world_spawn.NearWorldSpawn;
 import com.github.charlyb01.near_world_spawn.config.ModConfig;
-import net.minecraft.network.packet.s2c.play.PlayerSpawnPositionS2CPacket;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -10,7 +11,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Unit;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.profiler.Profiler;
@@ -21,8 +21,6 @@ import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Supplier;
 
@@ -35,30 +33,23 @@ public abstract class ServerWorldMixin extends World {
     @Shadow public abstract ServerChunkManager getChunkManager();
     @Shadow @NotNull public abstract MinecraftServer getServer();
 
-    @Inject(method = "setSpawnPos", at = @At("HEAD"))
-    private void updateRightChunks(BlockPos pos, float angle, CallbackInfo ci) {
-        ChunkPos oldPos = ModConfig.get().fixedLoadedChunks
-                ? new ChunkPos(this.getSpawnPos())
-                : new ChunkPos(BlockPos.ORIGIN);
-        ChunkPos newPos= ModConfig.get().fixedLoadedChunks
-                ? new ChunkPos(BlockPos.ORIGIN)
-                : new ChunkPos(pos);
+    @WrapOperation(method = "setSpawnPos", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerChunkManager;removeTicket(Lnet/minecraft/server/world/ChunkTicketType;Lnet/minecraft/util/math/ChunkPos;ILjava/lang/Object;)V"))
+    private <T> void updateRemovedChunkPos(ServerChunkManager instance, ChunkTicketType<T> ticketType, ChunkPos pos,
+                                           int radius, T argument, Operation<Void> original) {
+        if (ModConfig.get().fixedLoadedChunks && !NearWorldSpawn.needChunkUpdate) return;
 
-        this.getChunkManager().removeTicket(ChunkTicketType.START, oldPos, 11, Unit.INSTANCE);
-        this.getChunkManager().addTicket(ChunkTicketType.START, newPos, 11, Unit.INSTANCE);
-        this.getServer().getPlayerManager().sendToAll(new PlayerSpawnPositionS2CPacket(pos, angle));
+        ChunkPos oldPos = !ModConfig.get().fixedLoadedChunks && NearWorldSpawn.needChunkUpdate
+                ? new ChunkPos(BlockPos.ORIGIN) : pos;
+        original.call(instance, ticketType, oldPos, radius, argument);
     }
 
-    @Inject(method = "setSpawnPos", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerChunkManager;removeTicket(Lnet/minecraft/server/world/ChunkTicketType;Lnet/minecraft/util/math/ChunkPos;ILjava/lang/Object;)V"), cancellable = true)
-    private void avoidUnnecessaryChunksUpdate(BlockPos pos, float angle, CallbackInfo ci) {
-        if (!NearWorldSpawn.needChunkUpdate) {
-            if (ModConfig.get().fixedLoadedChunks) {
-                ci.cancel();
-            }
-            return;
-        }
+    @WrapOperation(method = "setSpawnPos", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerChunkManager;addTicket(Lnet/minecraft/server/world/ChunkTicketType;Lnet/minecraft/util/math/ChunkPos;ILjava/lang/Object;)V"))
+    private <T> void updateAddedChunkPos(ServerChunkManager instance, ChunkTicketType<T> ticketType, ChunkPos pos,
+                                           int radius, T argument, Operation<Void> original) {
+        if (ModConfig.get().fixedLoadedChunks && !NearWorldSpawn.needChunkUpdate) return;
 
+        ChunkPos newPos = ModConfig.get().fixedLoadedChunks ? new ChunkPos(BlockPos.ORIGIN) : pos;
+        original.call(instance, ticketType, newPos, radius, argument);
         NearWorldSpawn.needChunkUpdate = false;
-        ci.cancel();
     }
 }
