@@ -3,6 +3,7 @@ package com.github.charlyb01.near_world_spawn.mixin;
 import com.github.charlyb01.near_world_spawn.config.AreaShape;
 import com.github.charlyb01.near_world_spawn.config.ModConfig;
 import com.github.charlyb01.near_world_spawn.config.PlayerInfluence;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.SpawnLocating;
@@ -26,9 +27,24 @@ public abstract class ServerPlayerEntityMixin {
     private static final int MAX_ITERATION = 1000;
 
     @Inject(method = "getRespawnTarget", at = @At("HEAD"))
-    private void updateWorldSpawn(boolean alive, TeleportTarget.PostDimensionTransition postDimensionTransition,
-                                  CallbackInfoReturnable<TeleportTarget> cir) {
-        if (this.getSpawnPointPosition() != null) return;
+    private void updateWorldSpawnIfNoSpawnPoint(boolean alive, TeleportTarget.PostDimensionTransition postDimensionTransition,
+                                                CallbackInfoReturnable<TeleportTarget> cir) {
+        if (this.getSpawnPointPosition() == null) {
+            this.updateWorldSpawn();
+        }
+    }
+
+    @ModifyExpressionValue(method = "getRespawnTarget", at = @At(value = "INVOKE", target = "Ljava/util/Optional;isPresent()Z"))
+    private boolean updateWorldSpawnIfObstructedSpawnPoint(boolean original) {
+        if (!original) {
+            this.updateWorldSpawn();
+        }
+
+        return original;
+    }
+
+    @Unique
+    private void updateWorldSpawn() {
         if (!ModConfig.get().changingArea) return;
 
         ServerPlayerEntity thisPlayer = (ServerPlayerEntity)(Object) this;
